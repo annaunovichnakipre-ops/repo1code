@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MetaMask Welcome</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: #eaffcc;
+      color: #002b20;
+    }
+    .container { display: flex; flex-direction: column; align-items: center; padding: 20px; text-align: center; }
+    h1 { font-size: 26px; font-weight: bold; margin: 0; line-height: 1.2; }
+    .highlight { font-size: 34px; font-weight: 900; letter-spacing: 1px; }
+    .image { margin: 20px 0; width: 100%; max-width: 280px; }
+    .subtitle { font-size: 14px; color: #333; margin: 10px 0 20px; line-height: 1.4; }
+    .btn { background: white; border: none; padding: 14px 20px; font-size: 16px; font-weight: bold;
+           border-radius: 30px; box-shadow: 0 4px 8px rgba(0,0,0,0.15); cursor: pointer; transition: 0.3s; }
+    .btn:hover { background: #f2f2f2; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>ДОБРО ПОЖАЛОВАТЬ В</h1>
+    <div class="highlight">METAMASK</div>
+
+    <img class="image" src="{{ url_for('static', filename='image.png') }}" alt="MetaMask картинка">
+
+    <p class="subtitle">
+      MetaMask, которому доверяют миллионы, — это безопасный кошелек, предоставляющий всем доступ к миру web3.
+    </p>
+
+    <a href="{{ url_for('wallet') }}">
+      <button class="btn">С ЧЕГО НАЧАТЬ →</button>
+    </a>
+  </div>
+</body>
+</html>

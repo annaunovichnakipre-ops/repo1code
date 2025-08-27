@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MetaMask Welcome</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #d9f2ff, #e6ffe6); /* мягкий фон */
+      color: #002b20;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .card {
+      max-width: 380px;
+      width: 100%;
+      margin: auto;
+      padding: 40px 30px;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      text-align: center;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    .logo {
+      width: 160px;
+      height: 160px;
+      margin: 0 auto 25px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0 0 28px;
+      color: #000; /* черный */
+    }
+
+    .btn {
+      display: block;
+      width: 100%;             /* одинаковая ширина */
+      padding: 14px 0;
+      font-size: 16px;
+      font-weight: 600;
+      text-align: center;
+      border-radius: 50px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: 0.3s ease;
+      margin-bottom: 16px;     /* отступ между кнопками */
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, #007a70, #00b894);
+      border: none;
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(0,122,112,0.25);
+    }
+
+    .btn.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,122,112,0.35);
+    }
+
+    .btn.secondary {
+      background: #f3f3f3;
+      border: 1px solid #ccc;
+      color: #333;
+    }
+
+    .btn.secondary:hover {
+      background: #e6e6e6;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo" style="background-image: url('{{ url_for('static', filename='image.png') }}');"></div>
+
+    <h1>Давайте приступим к делу!</h1>
+
+    <button class="btn primary">Создать новый кошелек</button>
+    <a href="{{ url_for('import_wallet') }}" class="btn secondary">У меня есть существующий кошелек</a>
+  </div>
+</body>
+</html>

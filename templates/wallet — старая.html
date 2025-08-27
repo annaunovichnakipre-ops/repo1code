@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Кошелек</title>
+  <style>
+    body { margin: 0; padding: 0; font-family: Arial, sans-serif;
+           background: linear-gradient(135deg, #9b5de5, #6a00f4);
+           display: flex; justify-content: center; align-items: center; height: 100vh; }
+    .card { background: #e9c6ff; border-radius: 20px; width: 90%; max-width: 400px;
+            text-align: center; padding: 40px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .logo { width: 100px; height: 100px; margin: 0 auto 20px; background-size: cover; background-position: center; }
+    h1 { font-size: 22px; margin-bottom: 30px; color: #4b0082; }
+    .btn { display: block; width: 100%; padding: 15px; margin: 10px 0; font-size: 16px;
+           font-weight: bold; border: none; border-radius: 12px; cursor: pointer; transition: 0.3s; }
+    .btn.primary { background: #000; color: #fff; }
+    .btn.primary:hover { background: #333; }
+    .btn.secondary { background: rgba(255,255,255,0.4); color: #000; }
+    .btn.secondary:hover { background: rgba(255,255,255,0.6); }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo" style="background-image: url('https://via.placeholder.com/100');"></div>
+
+    <h1>Давайте приступим к делу!</h1>
+
+    <button class="btn primary">Создать новый кошелек</button>
+    
+    <a href="{{ url_for('import_wallet') }}">
+      <button class="btn secondary">У меня есть существующий кошелек</button>
+    </a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MetaMask Welcome</title>
+  <style>
+    /* Подключим современный шрифт Google Fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #eaffcc, #d3ffec);
+      color: #002b20;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: white;
+      padding: 40px 30px;
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+      text-align: center;
+      max-width: 420px;
+      width: 100%;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin: 0;
+      letter-spacing: 1px;
+      color: #006652;
+    }
+
+    .highlight {
+      font-size: 36px;
+      font-weight: 800;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      color: #ff6a00;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .image {
+      margin: 20px 0;
+      width: 100%;
+      max-width: 200px;
+    }
+
+    .subtitle {
+      font-size: 15px;
+      color: #444;
+      margin: 15px 0 25px;
+      line-height: 1.6;
+    }
+
+    .btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #ff6a00, #ff9c33);
+      border: none;
+      padding: 14px 32px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 50px;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      box-shadow: 0 6px 14px rgba(255,106,0,0.3);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(255,106,0,0.4);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>ДОБРО ПОЖАЛОВАТЬ В</h1>
+    <div class="highlight">METAMASK</div>
+
+    <img class="image" src="{{ url_for('static', filename='image.png') }}" alt="MetaMask картинка">
+
+    <p class="subtitle">
+      MetaMask, которому доверяют миллионы, — это безопасный кошелек, предоставляющий всем доступ к миру web3.
+    </p>
+
+    <a href="{{ url_for('wallet') }}" class="btn">С ЧЕГО НАЧАТЬ →</a>
+  </div>
+</body>
+</html>
