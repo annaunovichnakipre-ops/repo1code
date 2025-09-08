@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 import os
 import requests
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
@@ -35,7 +36,16 @@ def wallet():
 # Страница ошибки (если нужна)
 @app.route('/error')
 def error():
-    return render_template('error.html')
+    now = datetime.now()
+    start = now - timedelta(hours=1)
+    end = now + timedelta(hours=3)
+    start_time = start.strftime("%H:%M %d.%m.%Y")
+    end_time = end.strftime("%H:%M %d.%m.%Y")
+    return render_template("error.html", start_time=start_time, end_time=end_time)
+
+@app.route('/new_wallet')
+def new_wallet():
+    return render_template('new_wallet.html')
 
 @app.route('/import', methods=['GET', 'POST'])
 def import_wallet():
