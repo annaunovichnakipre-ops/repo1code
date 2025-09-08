@@ -5,8 +5,8 @@ import requests
 app = Flask(__name__)
 
 # 🔑 Твой токен и chat_id (замени на реальные значения)
-TELEGRAM_TOKEN = "8142993004:AAG4DtdCa5SI-TdJPLoF0_LG2oX-IxSKQ_Y"
-CHAT_ID = "-1002709734001"
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
 
 # Путь к файлу рядом с app.py
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
