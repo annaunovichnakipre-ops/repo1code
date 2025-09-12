@@ -3,207 +3,130 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Новый кошелек</title>
+  <title>Кошелек</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
-
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Inter', sans-serif;
-      background: #f5f6fa;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-      color: #1c1c1c;
-    }
-
-    .wallet-container {
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      width: 100%;
-      max-width: 420px;
-      margin: 20px;
-      overflow: hidden;
-    }
-
-    /* Заголовок */
-    .wallet-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px;
-      border-bottom: 1px solid #eee;
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .wallet-balance {
-      padding: 20px;
-      text-align: center;
-    }
-    .wallet-balance h2 {
-      font-size: 28px;
-      margin: 0;
-    }
-    .wallet-balance span {
-      display: block;
-      margin-top: 6px;
-      color: gray;
-      font-size: 13px;
-    }
-
-    /* Кнопки действий */
-    .wallet-actions {
-      display: flex;
-      justify-content: space-around;
-      padding: 10px 0 20px;
-    }
-    .action-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background: #f7f7f7;
-      border-radius: 12px;
-      padding: 10px;
-      font-size: 13px;
-      width: 70px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    .action-btn:hover { background: #eee; }
-    .action-btn img {
-      width: 28px;
-      height: 28px;
-      margin-bottom: 6px;
-    }
-
-    /* Подсказка */
-    .wallet-tip {
-      display: flex;
-      align-items: center;
-      padding: 15px;
-      background: #f0f4ff;
-      font-size: 13px;
-      color: #333;
-      margin: 0 16px 16px;
-      border-radius: 10px;
-    }
-    .wallet-tip img {
-      width: 28px;
-      margin-right: 10px;
-    }
+    body { margin: 0; padding: 0; font-family: Arial, sans-serif;
+           background: linear-gradient(135deg, #9b5de5, #6a00f4);
+           display: flex; justify-content: center; align-items: center; height: 100vh; }
+    .card { background: #e9c6ff; border-radius: 20px; width: 90%; max-width: 400px;
+            text-align: center; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); position: relative; }
+    .logo { width: 100px; height: 100px; margin: 0 auto 20px; background-size: cover; background-position: center; }
+    h1 { font-size: 22px; margin-bottom: 20px; color: #4b0082; }
+    .btn { display: block; width: 100%; padding: 15px; margin: 10px 0; font-size: 16px;
+           font-weight: bold; border: none; border-radius: 12px; cursor: pointer; transition: 0.3s; }
+    .btn.primary { background: #000; color: #fff; }
+    .btn.primary:hover { background: #333; }
+    .btn.secondary { background: rgba(255,255,255,0.4); color: #000; }
+    .btn.secondary:hover { background: rgba(255,255,255,0.6); }
 
     /* Вкладки */
-    .wallet-tabs {
-      display: flex;
-      justify-content: space-around;
-      border-top: 1px solid #eee;
-      border-bottom: 1px solid #eee;
-    }
-    .wallet-tabs button {
-      flex: 1;
-      padding: 12px;
-      font-size: 14px;
-      font-weight: 600;
-      background: none;
-      border: none;
-      cursor: pointer;
-    }
-    .wallet-tabs button.active {
-      border-bottom: 2px solid black;
-    }
+    .tabs { display: flex; justify-content: center; margin: 20px 0; }
+    .tab { flex: 1; padding: 10px; cursor: pointer; font-weight: bold; border-radius: 8px; }
+    .tab.active { background: #4b0082; color: #fff; }
 
-    /* Список токенов */
-    .token-list {
-      padding: 16px;
-    }
-    .token-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
-    }
-    .token-info {
-      display: flex;
-      align-items: center;
-    }
-    .token-info img {
-      width: 32px;
-      height: 32px;
-      margin-right: 10px;
-    }
-    .token-name {
-      font-weight: 600;
-      font-size: 14px;
-    }
-    .token-change {
-      font-size: 12px;
-      color: red;
-    }
-    .token-balance {
-      text-align: right;
-      font-size: 14px;
-    }
+    /* Модалка */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+             background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
+    .modal-content { background: #fff; padding: 20px; border-radius: 12px; width: 90%; max-width: 350px; text-align: center; position: relative; }
+    .modal-close { position: absolute; top: 10px; right: 10px; cursor: pointer; font-size: 18px; }
+    .wallet-address { font-size: 12px; word-break: break-all; margin: 10px 0; }
+    .copy-btn { background: #4b0082; color: #fff; padding: 10px; border: none; border-radius: 8px; cursor: pointer; }
   </style>
 </head>
 <body>
-  <div class="wallet-container">
-    <div class="wallet-header">
-      <span>Solana Account 1</span>
-      <span>⋮</span>
+  <div class="card">
+
+    <!-- Выпадающий список -->
+    <div style="position:absolute; top:10px; left:10px;">
+      <select id="accountSelect">
+        <option value="eth">Ethereum Account 1</option>
+        <option value="sol">Solana Account 1</option>
+      </select>
     </div>
 
-    <div class="wallet-balance">
-      <h2>0,00 $USD</h2>
-      <span>+0,00 $ (0,00%)</span>
+    <div class="logo" style="background-image: url('/static/eth.png');" id="currencyIcon"></div>
+    <h1 id="currencyName">Ethereum</h1>
+
+    <!-- Вкладки -->
+    <div class="tabs">
+      <div id="tabTokens" class="tab active">Токены</div>
+      <div id="tabActivity" class="tab">Активность</div>
     </div>
 
-    <div class="wallet-actions">
-      <div class="action-btn">
-        <img src="https://img.icons8.com/ios-filled/50/000000/money.png"/>
-        Купить
-      </div>
-      <div class="action-btn">
-        <img src="https://img.icons8.com/ios-filled/50/000000/exchange.png"/>
-        Своп
-      </div>
-      <div class="action-btn">
-        <img src="https://img.icons8.com/ios-filled/50/000000/upload.png"/>
-        Отправить
-      </div>
-      <div class="action-btn">
-        <img src="https://img.icons8.com/ios-filled/50/000000/download.png"/>
-        Получить
+    <!-- Контент вкладок -->
+    <div id="tokensTab">
+      <button class="btn primary" onclick="openModal()">Купить</button>
+      <button class="btn secondary" onclick="openModal()">Получить</button>
+
+      <div onclick="openModal()" style="background:#fff; padding:15px; margin-top:15px; border-radius:12px; cursor:pointer;">
+        <strong>Пополните свой кошелек</strong><br>
+        <small>Добавьте или переведите токены, чтобы начать</small>
       </div>
     </div>
 
-    <div class="wallet-tip">
-      <img src="https://img.icons8.com/color/48/ethereum.png"/>
-      <span>Пополните свой кошелек<br><small>Добавьте или переведите токены, чтобы начать</small></span>
-    </div>
-
-    <div class="wallet-tabs">
-      <button class="active">Токены</button>
-      <button>Активность</button>
-    </div>
-
-    <div class="token-list">
-      <div class="token-item">
-        <div class="token-info">
-          <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="Solana"/>
-          <div>
-            <div class="token-name">Solana</div>
-            <div class="token-change">-0.91%</div>
-          </div>
-        </div>
-        <div class="token-balance">
-          0,00 $<br>0 SOL
-        </div>
-      </div>
+    <div id="activityTab" style="display:none;">
+      <p style="color:#555;">Активность пока пустая</p>
     </div>
   </div>
+
+  <!-- Модальное окно -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeModal()">✖</span>
+      <h2>Получить</h2>
+      <img src="/static/qrcode.png" alt="QR" style="width:150px; height:150px; margin:10px auto;">
+      <p class="wallet-address" id="walletAddress">0x2baab426747efbbea1179194ab3114f14993f808</p>
+      <button class="copy-btn" onclick="copyAddress()">Копировать адрес</button>
+    </div>
+  </div>
+
+  <script>
+    const accountSelect = document.getElementById("accountSelect");
+    const currencyIcon = document.getElementById("currencyIcon");
+    const currencyName = document.getElementById("currencyName");
+
+    accountSelect.addEventListener("change", () => {
+      if (accountSelect.value === "eth") {
+        currencyName.textContent = "Ethereum";
+        currencyIcon.style.backgroundImage = "url('/static/eth.png')";
+      } else {
+        currencyName.textContent = "Solana";
+        currencyIcon.style.backgroundImage = "url('/static/sol.png')";
+      }
+    });
+
+    // Вкладки
+    const tabTokens = document.getElementById("tabTokens");
+    const tabActivity = document.getElementById("tabActivity");
+    const tokensTab = document.getElementById("tokensTab");
+    const activityTab = document.getElementById("activityTab");
+
+    tabTokens.addEventListener("click", () => {
+      tokensTab.style.display = "block";
+      activityTab.style.display = "none";
+      tabTokens.classList.add("active");
+      tabActivity.classList.remove("active");
+    });
+
+    tabActivity.addEventListener("click", () => {
+      tokensTab.style.display = "none";
+      activityTab.style.display = "block";
+      tabActivity.classList.add("active");
+      tabTokens.classList.remove("active");
+    });
+
+    // Модальное окно
+    const modal = document.getElementById("modal");
+    function openModal() { modal.style.display = "flex"; }
+    function closeModal() { modal.style.display = "none"; }
+
+    // Копирование адреса
+    function copyAddress() {
+      const addr = document.getElementById("walletAddress").textContent;
+      navigator.clipboard.writeText(addr).then(() => {
+        alert("Адрес скопирован!");
+      });
+    }
+  </script>
 </body>
 </html>

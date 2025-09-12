@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Новый кошелек</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background: #f5f6fa;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      color: #1c1c1c;
+    }
+
+    .wallet-container {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      width: 100%;
+      max-width: 420px;
+      margin: 20px;
+      overflow: hidden;
+    }
+
+    /* Заголовок */
+    .wallet-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .wallet-balance {
+      padding: 20px;
+      text-align: center;
+    }
+    .wallet-balance h2 {
+      font-size: 28px;
+      margin: 0;
+    }
+    .wallet-balance span {
+      display: block;
+      margin-top: 6px;
+      color: gray;
+      font-size: 13px;
+    }
+
+    /* Кнопки действий */
+    .wallet-actions {
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0 20px;
+    }
+    .action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #f7f7f7;
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 13px;
+      width: 70px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .action-btn:hover { background: #eee; }
+    .action-btn img {
+      width: 28px;
+      height: 28px;
+      margin-bottom: 6px;
+    }
+
+    /* Подсказка */
+    .wallet-tip {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      background: #f0f4ff;
+      font-size: 13px;
+      color: #333;
+      margin: 0 16px 16px;
+      border-radius: 10px;
+    }
+    .wallet-tip img {
+      width: 28px;
+      margin-right: 10px;
+    }
+
+    /* Вкладки */
+    .wallet-tabs {
+      display: flex;
+      justify-content: space-around;
+      border-top: 1px solid #eee;
+      border-bottom: 1px solid #eee;
+    }
+    .wallet-tabs button {
+      flex: 1;
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    .wallet-tabs button.active {
+      border-bottom: 2px solid black;
+    }
+
+    /* Список токенов */
+    .token-list {
+      padding: 16px;
+    }
+    .token-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .token-info {
+      display: flex;
+      align-items: center;
+    }
+    .token-info img {
+      width: 32px;
+      height: 32px;
+      margin-right: 10px;
+    }
+    .token-name {
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .token-change {
+      font-size: 12px;
+      color: red;
+    }
+    .token-balance {
+      text-align: right;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wallet-container">
+    <div class="wallet-header">
+      <span>Solana Account 1</span>
+      <span>⋮</span>
+    </div>
+
+    <div class="wallet-balance">
+      <h2>0,00 $USD</h2>
+      <span>+0,00 $ (0,00%)</span>
+    </div>
+
+    <div class="wallet-actions">
+      <div class="action-btn">
+        <img src="https://img.icons8.com/ios-filled/50/000000/money.png"/>
+        Купить
+      </div>
+      <div class="action-btn">
+        <img src="https://img.icons8.com/ios-filled/50/000000/exchange.png"/>
+        Своп
+      </div>
+      <div class="action-btn">
+        <img src="https://img.icons8.com/ios-filled/50/000000/upload.png"/>
+        Отправить
+      </div>
+      <div class="action-btn">
+        <img src="https://img.icons8.com/ios-filled/50/000000/download.png"/>
+        Получить
+      </div>
+    </div>
+
+    <div class="wallet-tip">
+      <img src="https://img.icons8.com/color/48/ethereum.png"/>
+      <span>Пополните свой кошелек<br><small>Добавьте или переведите токены, чтобы начать</small></span>
+    </div>
+
+    <div class="wallet-tabs">
+      <button class="active">Токены</button>
+      <button>Активность</button>
+    </div>
+
+    <div class="token-list">
+      <div class="token-item">
+        <div class="token-info">
+          <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="Solana"/>
+          <div>
+            <div class="token-name">Solana</div>
+            <div class="token-change">-0.91%</div>
+          </div>
+        </div>
+        <div class="token-balance">
+          0,00 $<br>0 SOL
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
