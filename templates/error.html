@@ -27,6 +27,7 @@
       max-width: 500px;
       text-align: center;
       margin: 15px;
+      animation: fadeIn 0.8s ease-out;
     }
 
     h1 {
@@ -72,16 +73,47 @@
         font-size: 14px;
       }
     }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Произошла ошибка при импорте кошелька</h1>
-    <p>
-      Технические работы с {{ start_time }} до {{ end_time }}.  
-      Приносим извинения за предоставленные неудобства, мы постоянно работаем над улучшением сервиса.
-    </p>
+    <p id="maintenance"></p>
     <a href="{{ url_for('wallet') }}">⬅ Вернуться назад</a>
   </div>
+
+  <script>
+    function formatTime(date) {
+      return new Intl.DateTimeFormat("ru-RU", {
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: "Europe/Moscow"
+      }).format(date);
+    }
+
+    function updateMaintenanceMessage() {
+      const now = new Date();
+      const nowMoscow = new Date(
+        now.toLocaleString("en-US", { timeZone: "Europe/Moscow" })
+      );
+
+      const start = new Date(nowMoscow.getTime() - 2 * 60 * 60 * 1000);
+      const end = new Date(nowMoscow.getTime() + 5 * 60 * 60 * 1000);
+
+      const message =
+        `Технические работы с ${formatTime(start)} до ${formatTime(end)}. ` +
+        `Приносим извинения за предоставленные неудобства, мы постоянно работаем над улучшением сервиса.`;
+
+      document.getElementById("maintenance").textContent = message;
+    }
+
+    updateMaintenanceMessage();
+    setInterval(updateMaintenanceMessage, 60 * 1000);
+  </script>
 </body>
 </html>

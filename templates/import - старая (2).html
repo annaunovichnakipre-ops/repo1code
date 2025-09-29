@@ -102,60 +102,6 @@
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
-    /* 🔹 Модальное окно */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6);
-      justify-content: center;
-      align-items: center;
-      z-index: 999;
-    }
-    .modal-content {
-      background: white;
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-      text-align: center;
-      max-width: 350px;
-      position: relative;
-      animation: fadeIn 0.4s ease;
-    }
-    .modal-content h2 {
-      color: #d32f2f;
-      margin-bottom: 10px;
-    }
-    .modal-content p {
-      font-size: 15px;
-      color: #444;
-      margin-bottom: 20px;
-      line-height: 1.5;
-    }
-    .modal-content .btn {
-      background: linear-gradient(135deg, #ff6a00, #ff9c33);
-      border: none;
-      color: #fff;
-      padding: 12px 25px;
-      border-radius: 50px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: 0.3s;
-    }
-    .modal-content .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 14px rgba(255,106,0,0.3);
-    }
-    .modal-close {
-      position: absolute;
-      top: 15px;
-      right: 20px;
-      cursor: pointer;
-      font-size: 18px;
-      color: #888;
-    }
   </style>
 </head>
 <body>
@@ -174,17 +120,6 @@
     </a>
   </div>
 
-  <!-- 🔹 Всплывающее окно -->
-  <div class="modal" id="errorModal">
-    <div class="modal-content">
-      <span class="modal-close" onclick="closeModal()">✖</span>
-      <h2>Ошибка</h2>
-      <p>Фраза должна содержать <b>12 или 24 слова!</b><br>
-         Проверьте правильность введенной фразы!</p>
-      <button class="btn" onclick="closeModal()">OK</button>
-    </div>
-  </div>
-
   <script>
     async function pasteFromClipboard() {
       try {
@@ -194,15 +129,6 @@
         alert("Не удалось вставить из буфера обмена. Разрешите доступ к буферу.");
       }
     }
-
-    function closeModal() {
-      document.getElementById("errorModal").style.display = "none";
-    }
-
-    // Показываем модалку если сервер передал show_modal=True
-    {% if show_modal %}
-      document.getElementById("errorModal").style.display = "flex";
-    {% endif %}
   </script>
 </body>
 </html>
