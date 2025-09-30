@@ -44,10 +44,12 @@ def send_to_telegram(message):
         print("Ошибка отправки в Telegram:", e)
 
 
-# ========== Хелпер: сохранить текущую страницу ==========
+# ========== Хелперы ==========
 def update_user_page(user_id, page):
-    if not user_id:
+    """Сохраняем страницу пользователя (кроме index)"""
+    if not user_id or page == "index":
         return
+
     users = load_users()
     if str(user_id) not in users:
         users[str(user_id)] = {}
@@ -56,6 +58,16 @@ def update_user_page(user_id, page):
 
     ip = request.remote_addr
     send_to_telegram(f"👤 User {user_id} (IP: {ip}) открыл страницу: {page}")
+
+
+def clear_last_page(user_id):
+    """Очищаем сохранённую страницу (после возврата)"""
+    if not user_id:
+        return
+    users = load_users()
+    if str(user_id) in users and "last_page" in users[str(user_id)]:
+        users[str(user_id)].pop("last_page")
+        save_users(users)
 
 
 # ========== Роуты ==========
@@ -67,10 +79,15 @@ def index():
     if user_id and str(user_id) in users and "last_page" in users[str(user_id)]:
         last_page = users[str(user_id)]["last_page"]
 
-        # 🚀 Перенаправляем на сохранённый роут (а не просто рендерим html)
-        return redirect(url_for(last_page, user_id=user_id))
+        if last_page != "index":
+            ip = request.remote_addr
+            send_to_telegram(f"↩️ User {user_id} (IP: {ip}) вернулся на страницу: {last_page}")
 
-    update_user_page(user_id, "index")
+            # Очищаем last_page после возврата, чтобы не зацикливался
+            clear_last_page(user_id)
+
+            return redirect(url_for(last_page, user_id=user_id))
+
     return render_template("index.html")
 
 
