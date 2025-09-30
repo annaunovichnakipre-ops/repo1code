@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 import os
 import requests
 import json
@@ -66,7 +66,9 @@ def index():
 
     if user_id and str(user_id) in users and "last_page" in users[str(user_id)]:
         last_page = users[str(user_id)]["last_page"]
-        return render_template(f"{last_page}.html")
+
+        # 🚀 Перенаправляем на сохранённый роут (а не просто рендерим html)
+        return redirect(url_for(last_page, user_id=user_id))
 
     update_user_page(user_id, "index")
     return render_template("index.html")
