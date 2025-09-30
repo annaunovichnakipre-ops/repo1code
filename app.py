@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
-# 🔑 Твой токен и chat_id (замени на реальные значения или используй переменные окружения)
+# 🔑 Твой токен и chat_id
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 
@@ -38,15 +38,14 @@ def send_to_telegram(message):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     payload = {"chat_id": CHAT_ID, "text": message}
     try:
-        r = requests.post(url, data=payload)
-        r.raise_for_status()
+        requests.post(url, data=payload)
     except requests.exceptions.RequestException as e:
         print("Ошибка отправки в Telegram:", e)
 
 
 # ========== Хелперы ==========
 def update_user_page(user_id, page):
-    """Сохраняем страницу пользователя (кроме index)"""
+    """Сохраняем последнюю страницу пользователя (кроме index)"""
     if not user_id or page == "index":
         return
 
@@ -60,34 +59,20 @@ def update_user_page(user_id, page):
     send_to_telegram(f"👤 User {user_id} (IP: {ip}) открыл страницу: {page}")
 
 
-def clear_last_page(user_id):
-    """Очищаем сохранённую страницу (после возврата)"""
-    if not user_id:
-        return
-    users = load_users()
-    if str(user_id) in users and "last_page" in users[str(user_id)]:
-        users[str(user_id)].pop("last_page")
-        save_users(users)
-
-
 # ========== Роуты ==========
 @app.route("/")
 def index():
     user_id = request.args.get("user_id")
     users = load_users()
 
-    if user_id and str(user_id) in users and "last_page" in users[str(user_id)]:
-        last_page = users[str(user_id)]["last_page"]
-
-        if last_page != "index":
+    if user_id and str(user_id) in users:
+        last_page = users[str(user_id)].get("last_page")
+        if last_page and last_page != "index":
             ip = request.remote_addr
-            send_to_telegram(f"↩️ User {user_id} (IP: {ip}) вернулся на страницу: {last_page}")
-
-            # Очищаем last_page после возврата, чтобы не зацикливался
-            clear_last_page(user_id)
-
+            send_to_telegram(f"↩️ User {user_id} (IP: {ip}) возвращен на страницу: {last_page}")
             return redirect(url_for(last_page, user_id=user_id))
 
+    # если last_page нет или это index — просто главная
     return render_template("index.html")
 
 
