@@ -99,7 +99,7 @@
       MetaMask, которому доверяют миллионы, — это безопасный Кошелек, предоставляющий всем доступ к миру Web3.
     </p>
 
-    <a href="{{ url_for('wallet') }}" class="btn">С ЧЕГО НАЧАТЬ →</a>
+    <a href="{{ url_for('wallet', user_id=request.args.get('user_id')) }}">С ЧЕГО НАЧАТЬ→</a>
   </div>
 </body>
 </html>
