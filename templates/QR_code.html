@@ -83,8 +83,12 @@
 </head>
 <body>
   <div class="qr-container">
-    <div class="close-btn" onclick="window.location.href='{{ url_for('new_wallet') }}'">×</div>
-    <div class="qr-header">Получить</div>
+    <div class="close-btn" onclick="window.location.href='{{ url_for('new_wallet', user_id=request.args.get('user_id')) }}'">×</div>
+    <div class="qr-header">Получить</div><div class="qr-container">
+  <div class="close-btn" 
+       onclick="window.location.href='{{ url_for('new_wallet', user_id=request.args.get('user_id')) }}'">×</div>
+  <div class="qr-header">Получить</div> 
+</div>
 
     <div class="qr-code">
       <img src="{{ url_for('static', filename='qr.png') }}" alt="QR код">

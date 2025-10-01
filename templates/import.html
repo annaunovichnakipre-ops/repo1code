@@ -169,7 +169,7 @@
       <br>
       <button type="submit" class="btn">Импортировать</button>
     </form>
-    <a href="{{ url_for('wallet') }}">
+    <a href="{{ url_for('wallet', user_id=request.args.get('user_id')) }}">
       <button class="btn btn-secondary">Отмена</button>
     </a>
   </div>
