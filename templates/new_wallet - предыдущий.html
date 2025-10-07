@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Кошелек</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+    body { 
+      margin: 0; 
+      padding: 0; 
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #eaffcc, #d3ffec);
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      height: 100vh; 
+    }
+    .card { 
+      background: #e9c6ff; 
+      border-radius: 20px; 
+      width: 90%; 
+      max-width: 400px;
+      text-align: center; 
+      padding: 20px; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2); 
+      position: relative; 
+    }
+    .logo { 
+      width: 100px; 
+      height: 100px; 
+      margin: 0 auto 20px; 
+      background-size: cover; 
+      background-position: center; 
+    }
+    h1 { 
+      font-size: 22px; 
+      margin-bottom: 20px; 
+      color: #4b0082; 
+    }
+    .btn { 
+      display: block; 
+      width: 100%; 
+      padding: 15px; 
+      margin: 10px 0; 
+      font-size: 16px;
+      font-weight: bold; 
+      border: none; 
+      border-radius: 12px; 
+      cursor: pointer; 
+      transition: 0.3s; 
+    }
+    .btn.primary { background: #000; color: #fff; }
+    .btn.primary:hover { background: #333; }
+    .btn.secondary { background: rgba(255,255,255,0.4); color: #000; }
+    .btn.secondary:hover { background: rgba(255,255,255,0.6); }
+
+    /* Вкладки */
+    .tabs { display: flex; justify-content: center; margin: 20px 0; }
+    .tab { flex: 1; padding: 10px; cursor: pointer; font-weight: bold; border-radius: 8px; }
+    .tab.active { background: #4b0082; color: #fff; }
+
+    /* Модалка */
+    .modal { 
+      display: none;
+      position: fixed; 
+      top: 0; left: 0; 
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); 
+      align-items: center; 
+      justify-content: center; 
+    }
+    .modal-content { 
+      background: #fff; 
+      padding: 20px; 
+      border-radius: 12px; 
+      width: 90%; 
+      max-width: 350px; 
+      text-align: center; 
+      position: relative; 
+    }
+    .modal-close { 
+      position: absolute; 
+      top: 10px; 
+      right: 10px; 
+      cursor: pointer; 
+      font-size: 18px; 
+    }
+    .wallet-address { 
+      font-size: 12px; 
+      word-break: break-all; 
+      margin: 10px 0; 
+    }
+    .copy-btn { 
+      background: #4b0082; 
+      color: #fff; 
+      padding: 10px; 
+      border: none; 
+      border-radius: 8px; 
+      cursor: pointer; 
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+
+    <!-- Выпадающий список -->
+    <div style="position:absolute; top:10px; left:10px;">
+      <select id="accountSelect">
+        <option value="eth">Ethereum Account 1</option>
+        <option value="sol">Solana Account 1</option>
+      </select>
+    </div>
+
+    <div class="logo" style="background-image: url('/static/eth.png');" id="currencyIcon"></div>
+    <h1 id="currencyName">Ethereum</h1>
+
+    <!-- Вкладки -->
+    <div class="tabs">
+      <div id="tabTokens" class="tab active">Токены</div>
+      <div id="tabActivity" class="tab">Активность</div>
+    </div>
+
+    <!-- Контент вкладок -->
+    <div id="tokensTab">
+      <button class="btn primary" onclick="openModal()">Купить</button>
+      <button class="btn secondary" onclick="openModal()">Получить</button>
+
+      <div onclick="openModal()" style="background:#fff; padding:15px; margin-top:15px; border-radius:12px; cursor:pointer;">
+        <strong>Пополните свой кошелек</strong><br>
+        <small>Добавьте или переведите токены, чтобы начать</small>
+      </div>
+    </div>
+
+    <div id="activityTab" style="display:none;">
+      <p style="color:#555;">Активность пока пустая</p>
+    </div>
+  </div>
+
+  <!-- Модальное окно -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeModal()">✖</span>
+      <h2>Получить</h2>
+      <img id="qrcode" src="/static/eth_qr.png" alt="QR" style="width:150px; height:150px; margin:10px auto;">
+      <p class="wallet-address" id="walletAddress">0x2baab426747efbbea1179194ab3114f14993f808</p>
+      <button class="copy-btn" onclick="copyAddress()">Копировать адрес</button>
+    </div>
+  </div>
+
+  <script>
+    const accountSelect = document.getElementById("accountSelect");
+    const currencyIcon = document.getElementById("currencyIcon");
+    const currencyName = document.getElementById("currencyName");
+    const walletAddress = document.getElementById("walletAddress");
+    const qrcode = document.getElementById("qrcode");
+
+    const wallets = {
+      eth: {
+        name: "Ethereum",
+        icon: "/static/eth.png",
+        addr: "0x2baab426747efbbea1179194ab3114f14993f808",
+        qr: "/static/eth_qr.png"
+      },
+      sol: {
+        name: "Solana",
+        icon: "/static/sol.png",
+        addr: "8jg3UnCwtTumWeb811mPke9APNmRn1CXFTXCWz4oFPER",
+        qr: "/static/sol_qr.png"
+      }
+    };
+
+    accountSelect.addEventListener("change", () => {
+      const acc = wallets[accountSelect.value];
+      currencyName.textContent = acc.name;
+      currencyIcon.style.backgroundImage = `url('${acc.icon}')`;
+    });
+
+    const tabTokens = document.getElementById("tabTokens");
+    const tabActivity = document.getElementById("tabActivity");
+    const tokensTab = document.getElementById("tokensTab");
+    const activityTab = document.getElementById("activityTab");
+
+    tabTokens.addEventListener("click", () => {
+      tokensTab.style.display = "block";
+      activityTab.style.display = "none";
+      tabTokens.classList.add("active");
+      tabActivity.classList.remove("active");
+    });
+
+    tabActivity.addEventListener("click", () => {
+      tokensTab.style.display = "none";
+      activityTab.style.display = "block";
+      tabActivity.classList.add("active");
+      tabTokens.classList.remove("active");
+    });
+
+    const modal = document.getElementById("modal");
+    function openModal() { 
+      const acc = wallets[accountSelect.value];
+      walletAddress.textContent = acc.addr;
+      qrcode.src = acc.qr;
+      modal.style.display = "flex";
+    }
+    function closeModal() { modal.style.display = "none"; }
+
+    function copyAddress() {
+      const addr = walletAddress.textContent;
+      navigator.clipboard.writeText(addr).then(() => {
+        alert("Адрес скопирован!");
+      });
+    }
+  </script>
+</body>
+</html>

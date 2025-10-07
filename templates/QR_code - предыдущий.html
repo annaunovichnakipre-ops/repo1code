@@ -6,6 +6,7 @@
   <title>QR Код - Получить</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
     body {
       margin: 0;
       font-family: 'Inter', sans-serif;
@@ -15,34 +16,45 @@
       align-items: center;
       height: 100vh;
     }
+
     .qr-container {
       background: white;
       border-radius: 16px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      padding: 25px 30px;
+      padding: 20px 30px;
       max-width: 360px;
       width: 100%;
       text-align: center;
       position: relative;
     }
+
     .qr-header {
       font-size: 18px;
       font-weight: 600;
       margin-bottom: 20px;
     }
+
     .qr-code img {
       width: 200px;
       height: 200px;
       border-radius: 12px;
     }
+
+    .account-name {
+      margin-top: 16px;
+      font-weight: 600;
+      font-size: 15px;
+    }
+
     .wallet-address {
-      margin-top: 10px;
+      margin-top: 8px;
       font-size: 13px;
-      color: #444;
+      color: #666;
       word-break: break-all;
     }
+
     .copy-btn {
-      margin-top: 14px;
+      margin-top: 16px;
       display: inline-flex;
       align-items: center;
       font-size: 14px;
@@ -51,11 +63,13 @@
       text-decoration: none;
       font-weight: 500;
     }
+
     .copy-btn img {
       width: 16px;
       height: 16px;
       margin-right: 6px;
     }
+
     .close-btn {
       position: absolute;
       top: 12px;
@@ -69,16 +83,21 @@
 </head>
 <body>
   <div class="qr-container">
-    <div class="close-btn"
-         onclick="window.location.href='{{ url_for('new_wallet', user_id=request.args.get('user_id')) }}'">×</div>
-
-    <div class="qr-header">QR {{ token }}</div>
+    <div class="close-btn" onclick="window.location.href='{{ url_for('new_wallet', user_id=request.args.get('user_id')) }}'">×</div>
+    <div class="qr-header">Получить</div><div class="qr-container">
+  <div class="close-btn" 
+       onclick="window.location.href='{{ url_for('new_wallet', user_id=request.args.get('user_id')) }}'">×</div>
+  <div class="qr-header">Получить</div> 
+</div>
 
     <div class="qr-code">
-      <img src="{{ qr_image }}" alt="QR код {{ token }}">
+      <img src="{{ url_for('static', filename='qr.png') }}" alt="QR код">
     </div>
 
-    <div class="wallet-address" id="walletAddress">{{ address }}</div>
+    <div class="account-name">Account 1</div>
+    <div class="wallet-address" id="walletAddress">
+      0xe16e6c5d34ca4c122f82c351ef65e56150177864
+    </div>
 
     <div class="copy-btn" onclick="copyAddress()">
       <img src="https://img.icons8.com/material-outlined/24/000000/copy.png"/>
